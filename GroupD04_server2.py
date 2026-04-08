@@ -1,31 +1,18 @@
 import socket
 import time
-import json
+from puzzles import puzzles
 from email_results import send_email
-from puzzles import puzzles   # IMPORT puzzles here
 
 HOST = "0.0.0.0"
 PORT = 12345
 
-TIME_LIMIT = 120
+TIME_LIMIT = 300  # 5 minutes total game time
+MAX_HINTS = 2
 
 players = []
 scores = {}
 hints_used = {}
-
-
-def update_leaderboard(name, score):
-
-    try:
-        with open("leaderboard.json", "r") as file:
-            data = json.load(file)
-    except:
-        data = {}
-
-    data[name] = score
-
-    with open("leaderboard.json", "w") as file:
-        json.dump(data, file)
+player_times = {}
 
 
 def start_server():
@@ -62,6 +49,7 @@ def start_server():
         for conn, name in players:
 
             solved = False
+            hint_index = 0
 
             while not solved:
 
@@ -70,34 +58,43 @@ def start_server():
                 if elapsed > TIME_LIMIT:
 
                     conn.send("Time is up! Game over.\n".encode())
-
                     conn.close()
-
                     return
 
                 message = puzzle["question"] + "\n(Type 'hint' if needed)"
 
                 conn.send(message.encode())
 
-                answer = conn.recv(1024).decode().upper()
+                answer = conn.recv(1024).decode().lower()
 
-                if answer == "HINT":
+                if answer == "hint":
 
-                    if hints_used[name] < 2:
+                    if hints_used[name] < MAX_HINTS:
 
-                        conn.send(("Hint: " + puzzle["hint"] + "\n").encode())
+                        if hint_index < len(puzzle["hints"]):
 
-                        hints_used[name] += 1
+                            conn.send(
+                                ("Hint: " +
+                                 puzzle["hints"][hint_index] +
+                                 "\n").encode()
+                            )
+
+                            hint_index += 1
+                            hints_used[name] += 1
+
+                        else:
+
+                            conn.send("No more hints for this puzzle.\n".encode())
 
                     else:
 
-                        conn.send("No hints left!\n".encode())
+                        conn.send("You used all hints already.\n".encode())
 
                 elif answer == puzzle["answer"]:
 
                     conn.send("Correct!\n".encode())
 
-                    scores[name] += 1
+                    scores[name] += puzzle["points"]
 
                     solved = True
 
@@ -107,21 +104,32 @@ def start_server():
 
     end_time = time.time()
 
-    player_results = {}
+    total_time = end_time - start_time
 
     for name in scores:
 
-        player_results[name] = (
+        player_times[name] = total_time
+
+    winner = max(
+        scores,
+        key=lambda name: (
             scores[name],
             -hints_used[name],
-            -(end_time - start_time)
+            -player_times[name]
         )
-
-    winner = max(player_results, key=player_results.get)
+    )
 
     for conn, name in players:
 
-        result = f"Game finished! Winner: {winner}"
+        result = f"""
+Game finished!
+
+Winner: {winner}
+
+Your Score: {scores[name]}
+Hints Used: {hints_used[name]}
+Time Taken: {round(player_times[name],2)} seconds
+"""
 
         conn.send(result.encode())
 
@@ -129,10 +137,9 @@ def start_server():
             name,
             scores[name],
             hints_used[name],
-            end_time - start_time
+            player_times[name],
+            winner
         )
-
-        update_leaderboard(name, scores[name])
 
         conn.close()
 
