@@ -1,37 +1,37 @@
 puzzles = [
     {
+        "question": "What number comes next? 2, 4, 6, 8?",
+        "answer": "10",
+        "hints": [
+            "It follows an even number pattern.",
+            "Add 2 to the last number."
+        ],
+        "points": 10
+    },
+    {
+        "question": "Unscramble: PNOYHT",
+        "answer": "python",
+        "hints": [
+            "It is a programming language.",
+            "You are using it for this project."
+        ],
+        "points": 10
+    },
+    {
+        "question": "5 + 7 * 2 = ?",
+        "answer": "19",
+        "hints": [
+            "Use order of operations.",
+            "Multiply before adding."
+        ],
+        "points": 10
+    },
+    {
         "question": "What has keys but can't open locks?",
         "answer": "piano",
         "hints": [
             "It is a musical instrument.",
             "It has black and white keys."
-        ],
-        "points": 10
-    },
-    {
-        "question": "I speak without a mouth and hear without ears. What am I?",
-        "answer": "echo",
-        "hints": [
-            "You often hear it in mountains.",
-            "It repeats your voice."
-        ],
-        "points": 10
-    },
-    {
-        "question": "What has a head and a tail but no body?",
-        "answer": "coin",
-        "hints": [
-            "It is used as money.",
-            "It can be flipped in a game."
-        ],
-        "points": 10
-    },
-    {
-        "question": "The more you take, the more you leave behind. What are they?",
-        "answer": "footsteps",
-        "hints": [
-            "You make them when you walk.",
-            "They stay on the ground behind you."
         ],
         "points": 15
     },
@@ -46,23 +46,19 @@ puzzles = [
     }
 ]
 
-
 def get_total_puzzles():
     return len(puzzles)
-
 
 def get_puzzle(stage):
     if 0 <= stage < len(puzzles):
         return puzzles[stage]
     return None
 
-
 def get_question(stage):
     puzzle = get_puzzle(stage)
     if puzzle:
         return puzzle["question"]
     return None
-
 
 def check_answer(stage, user_answer):
     puzzle = get_puzzle(stage)
@@ -73,7 +69,6 @@ def check_answer(stage, user_answer):
     user_answer = user_answer.lower().strip()
 
     return user_answer == correct_answer
-
 
 def get_hint(stage, hint_number):
     puzzle = get_puzzle(stage)
@@ -86,7 +81,6 @@ def get_hint(stage, hint_number):
         return hints[hint_number]
 
     return None
-
 
 def get_points(stage):
     puzzle = get_puzzle(stage)
