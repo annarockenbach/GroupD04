@@ -1,44 +1,57 @@
 import smtplib
 from email.mime.text import MIMEText
 
-def send_email(receiver_email, player, score, hints, time_taken):
-    smtp_server = 'smtp.gmail.com'
-    port = 587
+sender_email = "your_email@gmail.com"
+password = "your_app_password"
 
-    sender_email = 'your_email@gmail.com'
-    sender_password = 'your_app_password'
 
-    subject = "Escape Room Game Result"
+def send_email(player, score, hints, time_taken, winner):
+
+    subject = "Escape Room Game Results"
 
     body = f"""
 Hello {player},
 
 Here are your Escape Room results:
 
-Puzzles solved: {score}
+Score: {score}
 Hints used: {hints}
-Time taken: {round(time_taken, 2)} seconds
+Time taken: {round(time_taken,2)} seconds
 
-Better performance means:
-- More puzzles solved
-- Fewer hints used
-- Less time taken
+Winner: {winner}
 
-Thanks for playing!
+Ranking criteria:
+1. Highest score
+2. Fewest hints used
+3. Fastest completion time
+
+Thank you for playing!
 """
 
-    message = MIMEText(body, 'plain')
-    message['From'] = sender_email
-    message['To'] = receiver_email
-    message['Subject'] = subject
+    message = MIMEText(body)
+
+    message["Subject"] = subject
+    message["From"] = sender_email
+    message["To"] = sender_email
 
     try:
-        with smtplib.SMTP(smtp_server, port) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, receiver_email, message.as_string())
 
-        print("Email sent successfully!")
+        server = smtplib.SMTP("smtp.gmail.com", 587)
 
-    except Exception as e:
-        print("Error:", e)
+        server.starttls()
+
+        server.login(sender_email, password)
+
+        server.sendmail(
+            sender_email,
+            sender_email,
+            message.as_string()
+        )
+
+        server.quit()
+
+        print("Email sent successfully")
+
+    except:
+
+        print("Email sending failed")
