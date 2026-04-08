@@ -4,15 +4,16 @@ HOST = input("Enter server IP address: ")
 
 PORT = 12345
 
+
 def start_client():
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     client.connect((HOST, PORT))
 
-    name_request = client.recv(1024).decode()
+    name_prompt = client.recv(1024).decode()
 
-    name = input(name_request)
+    name = input(name_prompt)
 
     client.send(name.encode())
 
@@ -23,11 +24,9 @@ def start_client():
         print(message)
 
         if "Game finished" in message:
-
             break
 
         if "Time is up" in message:
-
             break
 
         answer = input("Answer: ")
