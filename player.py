@@ -1,28 +1,35 @@
-class Player:
-    def __init__(self, name):
-        self.name = name
-        self.stage = 0
-        self.score = 0
-        self.hints_used = 0
-        self.finished = False
+import socket
 
-    def next_stage(self):
-        self.stage += 1
+HOST = input("Enter server IP address: ")
+PORT = 12345
 
-    def add_score(self, points):
-        self.score += points
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((HOST, PORT))
 
-    def use_hint(self):
-        self.hints_used += 1
+while True:
+    try:
+        message = client.recv(1024).decode()
 
-    def finish_game(self):
-        self.finished = True
+        if not message:
+            break
 
-    def show_status(self):
-        return (
-            f"Player: {self.name}\n"
-            f"Current Stage: {self.stage}\n"
-            f"Score: {self.score}\n"
-            f"Hints Used: {self.hints_used}\n"
-            f"Finished: {self.finished}"
-        )
+        print(message)
+
+        # only send input when needed
+        if "Enter your name:" in message:
+            client.send(input().encode())
+
+        elif "Enter your email:" in message:
+            client.send(input().encode())
+
+        elif "(Type 'hint')" in message or "Wrong answer" in message or "Hint:" in message:
+            answer = input("Your answer: ")
+            client.send(answer.encode())
+
+        elif "finished" in message.lower() or "game over" in message.lower():
+            break
+
+    except:
+        break
+
+client.close()
